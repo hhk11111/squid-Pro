@@ -98,4 +98,416 @@ canvas{
 
 <div class="panel">
 
-<h2>🦑 AI軟絲導航 Lite</h
+<h2>🦑 AI軟絲導航 Lite</h2>
+
+<div class="card">
+
+<h3>設定</h3>
+
+<input
+id="apiKey"
+type="password"
+placeholder="CWA API Key (可選)">
+
+<br><br>
+
+<button onclick="saveKey()">
+儲存 API Key
+</button>
+
+</div>
+
+<button onclick="gps()">
+📍 GPS定位
+</button>
+
+<button onclick="openWindy()">
+🌪 Windy
+</button>
+
+<button onclick="openWindguru()">
+📈 Windguru
+</button>
+
+<div id="out"></div>
+
+<div class="card">
+
+<h3>🌊 風浪趨勢</h3>
+
+<canvas id="marineChart">
+</canvas>
+
+</div>
+
+</div>
+
+<script>
+
+let currentLat=null;
+let currentLng=null;
+
+const map=
+L.map("map").setView(
+[25.12,121.91],
+10
+);
+
+L.tileLayer(
+'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+{
+maxZoom:19
+}
+).addTo(map);
+
+function saveKey(){
+
+localStorage.setItem(
+
+"CWA_API_KEY",
+
+document.getElementById(
+"apiKey"
+).value
+
+);
+
+alert("已儲存");
+
+}
+
+window.addEventListener(
+
+"load",
+
+()=>{
+
+const key=
+localStorage.getItem(
+"CWA_API_KEY"
+);
+
+if(key){
+
+document.getElementById(
+"apiKey"
+).value=key;
+
+}
+
+}
+
+);
+
+function windArrow(deg){
+
+return `
+<span
+class="arrow"
+style="
+transform:rotate(${deg+180}deg);
+display:inline-block;
+">
+↑
+</span>
+`;
+
+}
+
+function waveArrow(deg){
+
+return `
+<span
+class="arrow"
+style="
+transform:rotate(${deg}deg);
+display:inline-block;
+">
+↑
+</span>
+`;
+
+}
+
+async function loadData(
+lat,
+lng
+){
+
+const marineUrl=
+
+`https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lng}&hourly=wave_height,wave_direction,wave_period&forecast_days=1&timezone=Asia%2FTaipei`;
+
+const weatherUrl=
+
+`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&hourly=wind_speed_10m,wind_direction_10m&forecast_days=1&timezone=Asia%2FTaipei`;
+
+const marine=
+await fetch(marineUrl)
+.then(r=>r.json());
+
+const weather=
+await fetch(weatherUrl)
+.then(r=>r.json());
+
+const h=
+new Date().getHours();
+
+function row(i,text){
+
+const waveHeight=
+marine.hourly.wave_height[i]||0;
+
+const waveDir=
+marine.hourly.wave_direction[i]||0;
+
+const windSpeed=
+weather.hourly.wind_speed_10m[i]||0;
+
+const windDir=
+weather.hourly.wind_direction_10m[i]||0;
+
+return `
+<div class="card">
+
+<b>${text}</b>
+
+<br><br>
+
+🌬 風
+
+${windArrow(windDir)}
+
+${Math.round(windDir)}°
+
+${windSpeed} km/h
+
+<br><br>
+
+🌊 浪
+
+${waveArrow(waveDir)}
+
+${Math.round(waveDir)}°
+
+${waveHeight} m
+
+</div>
+`;
+
+}
+
+let squidScore=60;
+
+const wave=
+marine.hourly.wave_height[h]||0;
+
+if(
+wave>=0.5 &&
+wave<=1.2
+){
+squidScore+=20;
+}
+
+if(
+weather.hourly.wind_speed_10m[h]
+<=20
+){
+squidScore+=10;
+}
+
+let status="🔴 不建議";
+
+if(squidScore>=90)
+status="🔥 爆咬";
+
+else if(squidScore>=75)
+status="🟢 良好";
+
+else if(squidScore>=60)
+status="🟡 普通";
+
+document.getElementById(
+"out"
+).innerHTML=
+
+`
+<div class="card">
+
+📍
+
+${lat.toFixed(4)},
+${lng.toFixed(4)}
+
+<br><br>
+
+🎯 軟絲指數
+
+${squidScore}/100
+
+<br><br>
+
+${status}
+
+</div>
+
+<div class="grid">
+
+${row(h,"現在")}
+
+${row(h+1,"+1小時")}
+
+${row(h+3,"+3小時")}
+
+</div>
+`;
+
+drawChart(
+marine,
+weather
+);
+
+}
+
+let chart=null;
+
+function drawChart(
+marine,
+weather
+){
+
+const labels=
+marine.hourly.time
+.slice(0,24)
+.map(
+t=>t.substring(11,16)
+);
+
+const wave=
+marine.hourly.wave_height
+.slice(0,24);
+
+const wind=
+weather.hourly.wind_speed_10m
+.slice(0,24);
+
+if(chart){
+
+chart.destroy();
+
+}
+
+chart=
+new Chart(
+
+document.getElementById(
+"marineChart"
+),
+
+{
+type:"line",
+
+data:{
+
+labels,
+
+datasets:[
+
+{
+label:"浪高(m)",
+data:wave,
+borderColor:"#38bdf8"
+},
+
+{
+label:"風速(km/h)",
+data:wind,
+borderColor:"#22c55e"
+}
+
+]
+
+}
+
+}
+
+);
+
+}
+
+function gps(){
+
+navigator.geolocation.getCurrentPosition(
+
+p=>{
+
+currentLat=
+p.coords.latitude;
+
+currentLng=
+p.coords.longitude;
+
+map.setView(
+[currentLat,currentLng],
+12
+);
+
+loadData(
+currentLat,
+currentLng
+);
+
+}
+
+);
+
+}
+
+function openWindy(){
+
+if(!currentLat){
+
+alert("請先定位");
+
+return;
+}
+
+window.open(
+`https://www.windy.com/?${currentLat},${currentLng},11`
+);
+
+}
+
+function openWindguru(){
+
+window.open(
+"https://www.windguru.cz/"
+);
+
+}
+
+map.on(
+
+"click",
+
+e=>{
+
+currentLat=
+e.latlng.lat;
+
+currentLng=
+e.latlng.lng;
+
+loadData(
+currentLat,
+currentLng
+);
+
+}
+
+);
+
+</script>
+
+</body>
+</html>
