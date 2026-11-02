@@ -251,13 +251,33 @@ const wave =
 marine.hourly.wave_height[h] || 0;
 
 if(
-    wave>=0.5 &&
-    wave<=1.2
+    wave >= 0.5 &&
+    wave <= 1.2
 ){
     squidScore += 20;
 }
 
-document.getElementById(
+if(
+    window.todayTideRange === "大"
+){
+    squidScore += 20;
+}
+else if(
+    window.todayTideRange === "中"
+){
+    squidScore += 10;
+}
+let squidStatus = "🔴 不建議";
+
+if(squidScore >= 90)
+    squidStatus = "🔥 爆咬";
+
+else if(squidScore >= 75)
+    squidStatus = "🟢 良好";
+
+else if(squidScore >= 60)
+    squidStatus = "🟡 普通";
+    document.getElementById(
     "out"
 ).innerHTML =
 
@@ -272,6 +292,10 @@ document.getElementById(
 🎯 軟絲指數
 
 ${squidScore}/100
+
+<br><br>
+
+${squidStatus}
 
 </div>
 
@@ -402,9 +426,32 @@ for(const station of tides){
         station;
 
     }
+if (!nearest) {
 
+    document.getElementById(
+        'tideInfo'
+    ).innerHTML = `
+        <div class="card">
+            ❌ 找不到最近潮汐站
+        </div>
+    `;
+
+    return;
 }
-if (!tides || tides.length === 0) {
+
+const today =
+nearest.Location.TimePeriods.Daily[0];
+window.todayTideRange =
+today.TideRange;
+const highTides =
+today.Time.filter(
+    t => t.Tide === "滿潮"
+);
+
+const lowTides =
+today.Time.filter(
+    t => t.Tide === "乾潮"
+);
 
 document.getElementById(
 'tideInfo'
@@ -417,24 +464,52 @@ document.getElementById(
 
 <br><br>
 
-潮汐站數：
-
-${tides.length}
-
-<br><br>
-
-📡 最近潮汐站：
+📡 最近潮汐站
 
 ${nearest.Location.LocationName}
 
 <br><br>
 
-📏 距離：
+📏 距離
 
 ${minDistance.toFixed(1)} km
 
+<br><br>
+
+🌊 潮型
+
+${today.TideRange}
+
+<br><br>
+
+🌕 農曆
+
+${today.LunarDate}
+
+<br><br>
+
+🌊 滿潮
+
+${highTides[0]?.DateTime.substring(11,16) || '--:--'}
+
+<br>
+
+${highTides[1]?.DateTime.substring(11,16) || '--:--'}
+
+<br><br>
+
+🌊 乾潮
+
+${lowTides[0]?.DateTime.substring(11,16) || '--:--'}
+
+<br>
+
+${lowTides[1]?.DateTime.substring(11,16) || '--:--'}
+
 </div>
 `;
+}
+
     <div class="card">
       ❌ 沒有潮汐資料
     </div>
