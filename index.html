@@ -332,59 +332,55 @@ console.log(
 
 const tides =
 data.records.TideForecasts;
-    function getDistance(lat1,lon1,lat2,lon2){
+   function getDistance(lat1, lon1, lat2, lon2){
 
     const R = 6371;
 
     const dLat =
-    (lat2-lat1) * Math.PI/180;
+    (lat2 - lat1) * Math.PI / 180;
 
     const dLon =
-    (lon2-lon1) * Math.PI/180;
+    (lon2 - lon1) * Math.PI / 180;
 
     const a =
-    Math.sin(dLat/2) *
-    Math.sin(dLat/2)
 
-    +
+      Math.sin(dLat/2) *
+      Math.sin(dLat/2)
 
-    Math.cos(lat1*Math.PI/180) *
-    Math.cos(lat2*Math.PI/180) *
+      +
 
-    Math.sin(dLon/2) *
-    Math.sin(dLon/2);
+      Math.cos(lat1*Math.PI/180) *
+      Math.cos(lat2*Math.PI/180)
+
+      *
+
+      Math.sin(dLon/2) *
+      Math.sin(dLon/2);
 
     const c =
-    2 *
-    Math.atan2(
+      2 *
+      Math.atan2(
         Math.sqrt(a),
         Math.sqrt(1-a)
-    );
+      );
 
-    return R*c;
+    return R * c;
 }
-    let nearest = null;
 
-let minDistance = 999999;
+let nearest = null;
+let minDistance = 99999;
 
 for(const station of tides){
 
     const lat =
     parseFloat(
-      station.Latitude
+      station.Location.Latitude
     );
 
     const lng =
     parseFloat(
-      station.Longitude
+      station.Location.Longitude
     );
-
-    if(
-      isNaN(lat) ||
-      isNaN(lng)
-    ){
-      continue;
-    }
 
     const distance =
     getDistance(
@@ -404,12 +400,13 @@ for(const station of tides){
 
         nearest =
         station;
+
     }
 
 }
 if (!tides || tides.length === 0) {
 
-    document.getElementById(
+document.getElementById(
 'tideInfo'
 ).innerHTML =
 
@@ -421,22 +418,20 @@ if (!tides || tides.length === 0) {
 <br><br>
 
 潮汐站數：
+
 ${tides.length}
 
 <br><br>
 
-最近潮汐站：
+📡 最近潮汐站：
 
-${nearest ?
-nearest.LocationName :
-'未知'}
+${nearest.Location.LocationName}
 
 <br><br>
 
-距離：
+📏 距離：
 
-${minDistance.toFixed(1)}
-km
+${minDistance.toFixed(1)} km
 
 </div>
 `;
@@ -479,11 +474,23 @@ document.getElementById(
 
 ✅ 潮汐API連線成功
 
-<br>
+<br><br>
 
 潮汐站數：
 
 ${tides.length}
+
+<br><br>
+
+最近潮汐站：
+
+${nearest.Location.LocationName}
+
+<br><br>
+
+距離：
+
+${minDistance.toFixed(1)} km
 
 </div>
 `;
