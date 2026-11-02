@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh-Hant"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI軟絲導航 Pro</title>
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+body{margin:0;background:#0f172a;color:#fff;font-family:sans-serif}#map{height:50vh}.panel{padding:12px}.card{background:#1e293b;padding:10px;border-radius:10px;margin:8px 0}.arrow{font-size:34px;display:inline-block}
+button{padding:8px;background:#2563eb;color:#fff;border:0;border-radius:6px}
+</style></head><body>
+<div id="map"></div><div class='panel'>
+<h2>🦑 AI軟絲導航 Pro</h2>
+<button onclick='gps()'>GPS定位</button>
+<div id='out'></div></div>
+<script>
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js')}
+const map=L.map('map').setView([25.12,121.91],10);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+function arrow(deg){return `<span class="arrow" style="transform:rotate(${deg}deg);display:inline-block">↑</span>`;}
+async function loadData(lat,lng){
+const urlM=`https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lng}&hourly=wave_height,wave_direction&forecast_days=1&timezone=Asia%2FTaipei`;
+const urlW=`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&hourly=wind_speed_10m,wind_direction_10m&forecast_days=1&timezone=Asia%2FTaipei`;
+const m=await fetch(urlM).then(r=>r.json());
+const w=await fetch(urlW).then(r=>r.json());
+const h=new Date().getHours();
+function row(i,label){let wh=m.hourly.wave_height[i]||0;let wd=m.hourly.wave_direction[i]||0;let ws=w.hourly.wind_speed_10m[i]||0;let wdir=w.hourly.wind_direction_10m[i]||0;return `<div class='card'><b>${label}</b><br>🌬風 ${arrow(wdir)} ${Math.round(wdir)}° ${ws}km/h<br>🌊浪 ${arrow(wd)} ${Math.round(wd)}° ${wh}m</div>`}
+let score=60;const wave=m.hourly.wave_height[h]||0;if(wave>=0.5&&wave<=1.2)score+=20;
+document.getElementById('out').innerHTML=`<div class='card'>📍${lat.toFixed(4)},${lng.toFixed(4)}<br>🎯軟絲指數 ${score}/100</div>${row(h,'現在')}${row(h+1,'+1小時')}${row(h+3,'+3小時')}<div class='card'>⭐建議黃金時段：日出前後2小時、日落前後2小時</div>`;
+}
+function gps(){navigator.geolocation.getCurrentPosition(p=>{map.setView([p.coords.latitude,p.coords.longitude],12);loadData(p.coords.latitude,p.coords.longitude);});}
+map.on('click',e=>loadData(e.latlng.lat,e.latlng.lng));
+</script></body></html>
