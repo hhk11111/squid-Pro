@@ -332,7 +332,41 @@ console.log(
 
 const tides =
 data.records.TideForecasts;
+if (!tides || tides.length === 0) {
 
+    document.getElementById(
+        'tideInfo'
+    ).innerHTML = `
+    <div class="card">
+      ❌ 沒有潮汐資料
+    </div>
+    `;
+
+    return;
+}
+
+const firstStation = tides[0];
+
+document.getElementById(
+    'tideInfo'
+).innerHTML = `
+<div class="card">
+
+✅ 潮汐API連線成功
+
+<br><br>
+
+潮汐站數：
+${tides.length}
+
+<br><br>
+
+第一個站：
+
+${firstStation.LocationName || '未知'}
+
+</div>
+`;
 document.getElementById(
 'tideInfo'
 ).innerHTML =
