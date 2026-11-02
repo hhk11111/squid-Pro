@@ -328,6 +328,9 @@ await response.json();
 
 console.log(data);
 
+const tides =
+data.records.TideForecasts;
+
 document.getElementById(
 'tideInfo'
 ).innerHTML =
@@ -337,10 +340,11 @@ document.getElementById(
 
 ✅ 潮汐API連線成功
 
-<br><br>
+<br>
 
-請按 F12
-查看 Console
+潮汐站數：
+
+${tides.length}
 
 </div>
 `;
