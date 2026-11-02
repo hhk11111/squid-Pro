@@ -1,194 +1,83 @@
 <!DOCTYPE html>
-<html lang="zh-Hant"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="zh-Hant">
+
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
 <title>AI軟絲導航 Pro</title>
+
 <link rel="manifest" href="manifest.json">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+<link rel="stylesheet"
+href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <style>
-body{margin:0;background:#0f172a;color:#fff;font-family:sans-serif}#map{height:50vh}.panel{padding:12px}.card{background:#1e293b;padding:10px;border-radius:10px;margin:8px 0}.arrow{font-size:34px;display:inline-block}
-button{padding:8px;background:#2563eb;color:#fff;border:0;border-radius:6px}
-</style></head><body>
-<div id="map"></div><div class='panel'>
+
+body{
+    margin:0;
+    background:#0f172a;
+    color:#fff;
+    font-family:sans-serif;
+}
+
+#map{
+    height:50vh;
+}
+
+.panel{
+    padding:12px;
+}
+
+.card{
+    background:#1e293b;
+    padding:12px;
+    border-radius:10px;
+    margin:10px 0;
+}
+
+button{
+    background:#2563eb;
+    color:white;
+    border:none;
+    border-radius:6px;
+    padding:8px 12px;
+    margin:3px;
+}
+
+input{
+    width:100%;
+    padding:8px;
+    border-radius:6px;
+}
+
+.arrow{
+    font-size:28px;
+    display:inline-block;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div id="map"></div>
+
+<div class="panel">
+
 <h2>🦑 AI軟絲導航 Pro</h2>
-  <h2>🦑 AI軟絲導航 Pro</h2>
-
-<div class="card">
-
-  <h3>⚙️ 設定</h3>
-
-  <input
-    id="cwaKey"
-    type="password"
-    placeholder="輸入中央氣象署 API Key"
-    style="width:100%;padding:8px;border-radius:6px;"
-  >
-
-  <br><br>
-
-  <button onclick="saveCwaKey()">
-    儲存 API Key
-    function saveCwaKey() {
-
-  const key =
-    document.getElementById(
-      'cwaKey'
-    ).value;
-
-  localStorage.setItem(
-    'CWA_API_KEY',
-    key
-  );
-
-  alert('已儲存');
-}
-
-window.addEventListener(
-  'load',
-  () => {
-
-    const key =
-      localStorage.getItem(
-        'CWA_API_KEY'
-      );
-
-    if(key){
-
-      document.getElementById(
-        'cwaKey'
-      ).value = key;
-    }
-  }
-);
-  </button>
-
-</div>
-
-<button onclick='gps()'>
-  GPS定位
-</button>
-
-<button onclick='openWindy()'>
-  🌪 Windy
-  function openWindy(){
-
-  if(!window.currentLat)return;
-
-  window.open(
-
-    `https://www.windy.com/?${window.currentLat},${window.currentLng},11`
-
-  );
-
-}
-</button>
-
-<button onclick='openWindguru()'>
-  📈 Windguru
-  function openWindguru(){
-
-  window.open(
-
-    'https://www.windguru.cz/'
-
-  );
-
-}
-</button>
-async function loadTideData(){
-
-  const key =
-    localStorage.getItem(
-      'CWA_API_KEY'
-    );
-
-  if(!key){
-
-    document.getElementById(
-      'tideInfo'
-    ).innerHTML =
-
-    `<div class="card">
-      請先輸入 API Key
-    </div>`;
-
-    return;
-  }
-
-
-  try{
-
-    const url =
-      `https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-A0021-001?Authorization=${key}&format=JSON`;
-
-    const res =
-      await fetch(url);
-
-    const data =
-      await res.json();
-
-    console.log(data);
-
-    document.getElementById(
-      'tideInfo'
-    ).innerHTML =
-
-    `<div class="card">
-
-      ✅ 潮汐 API 已連線成功
-
-      <br><br>
-
-      請按 F12 查看 JSON
-
-    </div>`;
-
-  }
-
-  catch(err){
-
-    console.error(err);
-
-    document.getElementById(
-      'tideInfo'
-    ).innerHTML =
-
-    `<div class="card">
-
-      ❌ 潮汐 API 連線失敗
-
-    </div>`;
-  }
-
-}
-<div id="tideInfo"></div>
-
-<div id='out'></div>
-<button onclick='gps()'>GPS定位</button>
-
-<button onclick='openWindy()'>
-🌪 Windy
-</button>
-
-<button onclick='openWindguru()'>
-📈 Windguru
-</button>
 
 <div class="card">
 
 <h3>⚙️ 中央氣象署 API Key</h3>
 
 <input
- id="cwaKey"
- type="password"
- placeholder="輸入 API Key"
- style="
- width:100%;
- padding:8px;
- border-radius:6px;
- margin-top:8px;
- "
->
+id="cwaKey"
+type="password"
+placeholder="輸入 CWA OpenData API Key">
 
 <br><br>
 
@@ -198,95 +87,357 @@ async function loadTideData(){
 
 </div>
 
+<button onclick="gps()">
+📍 GPS定位
+</button>
+
+<button onclick="openWindy()">
+🌪 Windy
+</button>
+
+<button onclick="openWindguru()">
+📈 Windguru
+</button>
+
 <div id="tideInfo"></div>
-<div id='out'></div></div>
+
+<div id="out"></div>
+
+</div>
+
 <script>
-  function gps(){
 
-  navigator.geolocation.getCurrentPosition(
+if ('serviceWorker' in navigator){
+    navigator.serviceWorker.register('sw.js');
+}
 
-    p=>{
+window.currentLat = null;
+window.currentLng = null;
 
-      window.currentLat =
-        p.coords.latitude;
+const map = L.map('map').setView(
+    [25.12,121.91],
+    10
+);
 
-      window.currentLng =
-        p.coords.longitude;
-
-      map.setView(
-
-        [
-          window.currentLat,
-          window.currentLng
-        ],
-
-        12
-
-      );
-
-      loadData(
-        window.currentLat,
-        window.currentLng
-      );
-
-      loadTideData();
-
+L.tileLayer(
+    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    {
+        maxZoom:19,
+        attribution:'© OpenStreetMap'
     }
+).addTo(map);
 
-  );
 function saveCwaKey(){
 
- const key =
-  document.getElementById(
-   'cwaKey'
-  ).value;
+    const key =
+    document.getElementById(
+        'cwaKey'
+    ).value;
 
- localStorage.setItem(
-  'CWA_API_KEY',
-  key
- );
+    localStorage.setItem(
+        'CWA_API_KEY',
+        key
+    );
 
- alert('已儲存 API Key');
-
+    alert('API Key 已儲存');
 }
 
 window.addEventListener(
+    'load',
+    ()=>{
 
- 'load',
+        const key =
+        localStorage.getItem(
+            'CWA_API_KEY'
+        );
 
- ()=>{
+        if(key){
 
-  const key =
-   localStorage.getItem(
+            document.getElementById(
+                'cwaKey'
+            ).value = key;
+        }
+    }
+);
+
+function windArrow(deg){
+
+    return `
+    <span
+    class="arrow"
+    style="
+      transform:rotate(${deg+180}deg);
+    ">
+    ↑
+    </span>
+    `;
+}
+
+function waveArrow(deg){
+
+    return `
+    <span
+    class="arrow"
+    style="
+      transform:rotate(${deg}deg);
+    ">
+    ↑
+    </span>
+    `;
+}
+
+async function loadData(
+    lat,
+    lng
+){
+
+const urlM =
+`https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lng}&hourly=wave_height,wave_direction,wave_period&forecast_days=1&timezone=Asia%2FTaipei`;
+
+const urlW =
+`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&hourly=wind_speed_10m,wind_direction_10m&forecast_days=1&timezone=Asia%2FTaipei`;
+
+const marine =
+await fetch(urlM)
+.then(r=>r.json());
+
+const weather =
+await fetch(urlW)
+.then(r=>r.json());
+
+const h =
+new Date().getHours();
+
+function row(i,label){
+
+    const wh =
+    marine.hourly.wave_height[i] || 0;
+
+    const wd =
+    marine.hourly.wave_direction[i] || 0;
+
+    const ws =
+    weather.hourly.wind_speed_10m[i] || 0;
+
+    const wdir =
+    weather.hourly.wind_direction_10m[i] || 0;
+
+    return `
+    <div class="card">
+
+      <b>${label}</b>
+
+      <br>
+
+      🌬風
+      ${windArrow(wdir)}
+      ${Math.round(wdir)}°
+      ${ws} km/h
+
+      <br>
+
+      🌊浪
+      ${waveArrow(wd)}
+      ${Math.round(wd)}°
+      ${wh} m
+
+    </div>
+    `;
+}
+
+let squidScore = 60;
+
+const wave =
+marine.hourly.wave_height[h] || 0;
+
+if(
+    wave>=0.5 &&
+    wave<=1.2
+){
+    squidScore += 20;
+}
+
+document.getElementById(
+    "out"
+).innerHTML =
+
+`
+<div class="card">
+
+📍 ${lat.toFixed(4)}
+, ${lng.toFixed(4)}
+
+<br>
+
+🎯 軟絲指數
+
+${squidScore}/100
+
+</div>
+
+${row(h,'現在')}
+
+${row(h+1,'+1小時')}
+
+${row(h+3,'+3小時')}
+
+<div class="card">
+
+⭐ 建議時段
+
+日出前後2小時
+
+日落前後2小時
+
+</div>
+`;
+}
+
+async function loadTideData(){
+
+const key =
+localStorage.getItem(
     'CWA_API_KEY'
-   );
+);
 
-  if(key){
+if(!key){
 
-   document.getElementById(
-    'cwaKey'
-   ).value = key;
+document.getElementById(
+'tideInfo'
+).innerHTML =
 
-  }
+`
+<div class="card">
+⚠️ 尚未輸入 API Key
+</div>
+`;
 
- }
+return;
+}
+
+try{
+
+const url =
+`https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-A0021-001?Authorization=${key}&format=JSON`;
+
+const response =
+await fetch(url);
+
+const data =
+await response.json();
+
+console.log(data);
+
+document.getElementById(
+'tideInfo'
+).innerHTML =
+
+`
+<div class="card">
+
+✅ 潮汐API連線成功
+
+<br><br>
+
+請按 F12
+查看 Console
+
+</div>
+`;
+
+}
+catch(error){
+
+console.error(error);
+
+document.getElementById(
+'tideInfo'
+).innerHTML =
+
+`
+<div class="card">
+
+❌ 潮汐API連線失敗
+
+</div>
+`;
+
+}
+}
+
+function gps(){
+
+navigator.geolocation.getCurrentPosition(
+
+p=>{
+
+window.currentLat =
+p.coords.latitude;
+
+window.currentLng =
+p.coords.longitude;
+
+map.setView(
+[
+window.currentLat,
+window.currentLng
+],
+12
+);
+
+loadData(
+window.currentLat,
+window.currentLng
+);
+
+loadTideData();
+
+}
 
 );
 }
-if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js')}
-const map=L.map('map').setView([25.12,121.91],10);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-function arrow(deg){return `<span class="arrow" style="transform:rotate(${deg}deg);display:inline-block">↑</span>`;}
-async function loadData(lat,lng){
-const urlM=`https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lng}&hourly=wave_height,wave_direction&forecast_days=1&timezone=Asia%2FTaipei`;
-const urlW=`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&hourly=wind_speed_10m,wind_direction_10m&forecast_days=1&timezone=Asia%2FTaipei`;
-const m=await fetch(urlM).then(r=>r.json());
-const w=await fetch(urlW).then(r=>r.json());
-const h=new Date().getHours();
-function row(i,label){let wh=m.hourly.wave_height[i]||0;let wd=m.hourly.wave_direction[i]||0;let ws=w.hourly.wind_speed_10m[i]||0;let wdir=w.hourly.wind_direction_10m[i]||0;return `<div class='card'><b>${label}</b><br>🌬風 ${arrow(wdir)} ${Math.round(wdir)}° ${ws}km/h<br>🌊浪 ${arrow(wd)} ${Math.round(wd)}° ${wh}m</div>`}
-let score=60;const wave=m.hourly.wave_height[h]||0;if(wave>=0.5&&wave<=1.2)score+=20;
-document.getElementById('out').innerHTML=`<div class='card'>📍${lat.toFixed(4)},${lng.toFixed(4)}<br>🎯軟絲指數 ${score}/100</div>${row(h,'現在')}${row(h+1,'+1小時')}${row(h+3,'+3小時')}<div class='card'>⭐建議黃金時段：日出前後2小時、日落前後2小時</div>`;
+
+function openWindy(){
+
+if(!window.currentLat){
+
+alert('請先定位');
+return;
 }
-function gps(){navigator.geolocation.getCurrentPosition(p=>{map.setView([p.coords.latitude,p.coords.longitude],12);loadData(p.coords.latitude,p.coords.longitude);});}
-map.on('click',e=>loadData(e.latlng.lat,e.latlng.lng));
-</script></body></html>
+
+window.open(
+`https://www.windy.com/?${window.currentLat},${window.currentLng},11`
+);
+
+}
+
+function openWindguru(){
+
+window.open(
+'https://www.windguru.cz/'
+);
+
+}
+
+map.on(
+'click',
+e=>{
+
+window.currentLat =
+e.latlng.lat;
+
+window.currentLng =
+e.latlng.lng;
+
+loadData(
+window.currentLat,
+window.currentLng
+);
+
+}
+);
+
+</script>
+
+</body>
+</html>
