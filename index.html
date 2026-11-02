@@ -332,11 +332,114 @@ console.log(
 
 const tides =
 data.records.TideForecasts;
+    function getDistance(lat1,lon1,lat2,lon2){
+
+    const R = 6371;
+
+    const dLat =
+    (lat2-lat1) * Math.PI/180;
+
+    const dLon =
+    (lon2-lon1) * Math.PI/180;
+
+    const a =
+    Math.sin(dLat/2) *
+    Math.sin(dLat/2)
+
+    +
+
+    Math.cos(lat1*Math.PI/180) *
+    Math.cos(lat2*Math.PI/180) *
+
+    Math.sin(dLon/2) *
+    Math.sin(dLon/2);
+
+    const c =
+    2 *
+    Math.atan2(
+        Math.sqrt(a),
+        Math.sqrt(1-a)
+    );
+
+    return R*c;
+}
+    let nearest = null;
+
+let minDistance = 999999;
+
+for(const station of tides){
+
+    const lat =
+    parseFloat(
+      station.Latitude
+    );
+
+    const lng =
+    parseFloat(
+      station.Longitude
+    );
+
+    if(
+      isNaN(lat) ||
+      isNaN(lng)
+    ){
+      continue;
+    }
+
+    const distance =
+    getDistance(
+
+      window.currentLat,
+      window.currentLng,
+
+      lat,
+      lng
+
+    );
+
+    if(distance < minDistance){
+
+        minDistance =
+        distance;
+
+        nearest =
+        station;
+    }
+
+}
 if (!tides || tides.length === 0) {
 
     document.getElementById(
-        'tideInfo'
-    ).innerHTML = `
+'tideInfo'
+).innerHTML =
+
+`
+<div class="card">
+
+✅ 潮汐API連線成功
+
+<br><br>
+
+潮汐站數：
+${tides.length}
+
+<br><br>
+
+最近潮汐站：
+
+${nearest ?
+nearest.LocationName :
+'未知'}
+
+<br><br>
+
+距離：
+
+${minDistance.toFixed(1)}
+km
+
+</div>
+`;
     <div class="card">
       ❌ 沒有潮汐資料
     </div>
