@@ -347,24 +347,36 @@ const url =
 const response =
 await fetch(url);
 
-const data =
-await response.json();
-
-console.log(
-  data.records.TideForecasts
-);
-
 const tides =
 data.records.TideForecasts;
-   function getDistance(lat1, lon1, lat2, lon2){
+
+if (!tides || tides.length === 0) {
+
+    document.getElementById(
+        'tideInfo'
+    ).innerHTML = `
+        <div class="card">
+            ❌ 沒有潮汐資料
+        </div>
+    `;
+
+    return;
+}
+
+function getDistance(
+    lat1,
+    lon1,
+    lat2,
+    lon2
+){
 
     const R = 6371;
 
     const dLat =
-    (lat2 - lat1) * Math.PI / 180;
+    (lat2-lat1) * Math.PI/180;
 
     const dLon =
-    (lon2 - lon1) * Math.PI / 180;
+    (lon2-lon1) * Math.PI/180;
 
     const a =
 
@@ -382,17 +394,18 @@ data.records.TideForecasts;
       Math.sin(dLon/2);
 
     const c =
-      2 *
-      Math.atan2(
-        Math.sqrt(a),
-        Math.sqrt(1-a)
-      );
+    2 *
+    Math.atan2(
+      Math.sqrt(a),
+      Math.sqrt(1-a)
+    );
 
-    return R * c;
+    return R*c;
 }
 
 let nearest = null;
-let minDistance = 99999;
+
+let minDistance = 999999;
 
 for(const station of tides){
 
@@ -424,33 +437,41 @@ for(const station of tides){
 
         nearest =
         station;
-
     }
-if (!nearest) {
+
+}
+
+if(!nearest){
 
     document.getElementById(
-        'tideInfo'
+      'tideInfo'
     ).innerHTML = `
-        <div class="card">
-            ❌ 找不到最近潮汐站
-        </div>
+      <div class="card">
+        ❌ 找不到最近潮汐站
+      </div>
     `;
 
     return;
 }
 
 const today =
-nearest.Location.TimePeriods.Daily[0];
+
+nearest
+.Location
+.TimePeriods
+.Daily[0];
+
 window.todayTideRange =
 today.TideRange;
+
 const highTides =
 today.Time.filter(
-    t => t.Tide === "滿潮"
+    t=>t.Tide==="滿潮"
 );
 
 const lowTides =
 today.Time.filter(
-    t => t.Tide === "乾潮"
+    t=>t.Tide==="乾潮"
 );
 
 document.getElementById(
@@ -460,11 +481,9 @@ document.getElementById(
 `
 <div class="card">
 
-✅ 潮汐API連線成功
-
-<br><br>
-
 📡 最近潮汐站
+
+<br>
 
 ${nearest.Location.LocationName}
 
@@ -472,11 +491,15 @@ ${nearest.Location.LocationName}
 
 📏 距離
 
+<br>
+
 ${minDistance.toFixed(1)} km
 
 <br><br>
 
 🌊 潮型
+
+<br>
 
 ${today.TideRange}
 
@@ -484,11 +507,15 @@ ${today.TideRange}
 
 🌕 農曆
 
+<br>
+
 ${today.LunarDate}
 
 <br><br>
 
 🌊 滿潮
+
+<br>
 
 ${highTides[0]?.DateTime.substring(11,16) || '--:--'}
 
@@ -500,6 +527,8 @@ ${highTides[1]?.DateTime.substring(11,16) || '--:--'}
 
 🌊 乾潮
 
+<br>
+
 ${lowTides[0]?.DateTime.substring(11,16) || '--:--'}
 
 <br>
@@ -508,69 +537,6 @@ ${lowTides[1]?.DateTime.substring(11,16) || '--:--'}
 
 </div>
 `;
-}
-
-    <div class="card">
-      ❌ 沒有潮汐資料
-    </div>
-    `;
-
-    return;
-}
-
-const firstStation = tides[0];
-
-document.getElementById(
-    'tideInfo'
-).innerHTML = `
-<div class="card">
-
-✅ 潮汐API連線成功
-
-<br><br>
-
-潮汐站數：
-${tides.length}
-
-<br><br>
-
-第一個站：
-
-${firstStation.LocationName || '未知'}
-
-</div>
-`;
-document.getElementById(
-'tideInfo'
-).innerHTML =
-
-`
-<div class="card">
-
-✅ 潮汐API連線成功
-
-<br><br>
-
-潮汐站數：
-
-${tides.length}
-
-<br><br>
-
-最近潮汐站：
-
-${nearest.Location.LocationName}
-
-<br><br>
-
-距離：
-
-${minDistance.toFixed(1)} km
-
-</div>
-`;
-
-}
 catch(error){
 
 console.error(error);
