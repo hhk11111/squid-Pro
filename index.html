@@ -11,9 +11,197 @@ button{padding:8px;background:#2563eb;color:#fff;border:0;border-radius:6px}
 </style></head><body>
 <div id="map"></div><div class='panel'>
 <h2>🦑 AI軟絲導航 Pro</h2>
+  <h2>🦑 AI軟絲導航 Pro</h2>
+
+<div class="card">
+
+  <h3>⚙️ 設定</h3>
+
+  <input
+    id="cwaKey"
+    type="password"
+    placeholder="輸入中央氣象署 API Key"
+    style="width:100%;padding:8px;border-radius:6px;"
+  >
+
+  <br><br>
+
+  <button onclick="saveCwaKey()">
+    儲存 API Key
+    function saveCwaKey() {
+
+  const key =
+    document.getElementById(
+      'cwaKey'
+    ).value;
+
+  localStorage.setItem(
+    'CWA_API_KEY',
+    key
+  );
+
+  alert('已儲存');
+}
+
+window.addEventListener(
+  'load',
+  () => {
+
+    const key =
+      localStorage.getItem(
+        'CWA_API_KEY'
+      );
+
+    if(key){
+
+      document.getElementById(
+        'cwaKey'
+      ).value = key;
+    }
+  }
+);
+  </button>
+
+</div>
+
+<button onclick='gps()'>
+  GPS定位
+</button>
+
+<button onclick='openWindy()'>
+  🌪 Windy
+  function openWindy(){
+
+  if(!window.currentLat)return;
+
+  window.open(
+
+    `https://www.windy.com/?${window.currentLat},${window.currentLng},11`
+
+  );
+
+}
+</button>
+
+<button onclick='openWindguru()'>
+  📈 Windguru
+  function openWindguru(){
+
+  window.open(
+
+    'https://www.windguru.cz/'
+
+  );
+
+}
+</button>
+async function loadTideData(){
+
+  const key =
+    localStorage.getItem(
+      'CWA_API_KEY'
+    );
+
+  if(!key){
+
+    document.getElementById(
+      'tideInfo'
+    ).innerHTML =
+
+    `<div class="card">
+      請先輸入 API Key
+    </div>`;
+
+    return;
+  }
+
+
+  try{
+
+    const url =
+      `https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-A0021-001?Authorization=${key}&format=JSON`;
+
+    const res =
+      await fetch(url);
+
+    const data =
+      await res.json();
+
+    console.log(data);
+
+    document.getElementById(
+      'tideInfo'
+    ).innerHTML =
+
+    `<div class="card">
+
+      ✅ 潮汐 API 已連線成功
+
+      <br><br>
+
+      請按 F12 查看 JSON
+
+    </div>`;
+
+  }
+
+  catch(err){
+
+    console.error(err);
+
+    document.getElementById(
+      'tideInfo'
+    ).innerHTML =
+
+    `<div class="card">
+
+      ❌ 潮汐 API 連線失敗
+
+    </div>`;
+  }
+
+}
+<div id="tideInfo"></div>
+
+<div id='out'></div>
 <button onclick='gps()'>GPS定位</button>
 <div id='out'></div></div>
 <script>
+  function gps(){
+
+  navigator.geolocation.getCurrentPosition(
+
+    p=>{
+
+      window.currentLat =
+        p.coords.latitude;
+
+      window.currentLng =
+        p.coords.longitude;
+
+      map.setView(
+
+        [
+          window.currentLat,
+          window.currentLng
+        ],
+
+        12
+
+      );
+
+      loadData(
+        window.currentLat,
+        window.currentLng
+      );
+
+      loadTideData();
+
+    }
+
+  );
+
+}
 if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js')}
 const map=L.map('map').setView([25.12,121.91],10);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
