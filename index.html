@@ -349,7 +349,6 @@ await fetch(url);
 
 const tides =
 data.records.TideForecasts;
-
 if (!tides || tides.length === 0) {
 
     document.getElementById(
@@ -363,12 +362,7 @@ if (!tides || tides.length === 0) {
     return;
 }
 
-function getDistance(
-    lat1,
-    lon1,
-    lat2,
-    lon2
-){
+function getDistance(lat1, lon1, lat2, lon2){
 
     const R = 6371;
 
@@ -404,7 +398,6 @@ function getDistance(
 }
 
 let nearest = null;
-
 let minDistance = 999999;
 
 for(const station of tides){
@@ -438,7 +431,6 @@ for(const station of tides){
         nearest =
         station;
     }
-
 }
 
 if(!nearest){
@@ -455,23 +447,19 @@ if(!nearest){
 }
 
 const today =
-
-nearest
-.Location
-.TimePeriods
-.Daily[0];
+nearest.Location.TimePeriods.Daily[0];
 
 window.todayTideRange =
 today.TideRange;
 
 const highTides =
 today.Time.filter(
-    t=>t.Tide==="滿潮"
+t => t.Tide === "滿潮"
 );
 
 const lowTides =
 today.Time.filter(
-    t=>t.Tide==="乾潮"
+t => t.Tide === "乾潮"
 );
 
 document.getElementById(
@@ -537,23 +525,18 @@ ${lowTides[1]?.DateTime.substring(11,16) || '--:--'}
 
 </div>
 `;
+}
 catch(error){
 
-console.error(error);
+    console.error(error);
 
-document.getElementById(
-'tideInfo'
-).innerHTML =
-
-`
-<div class="card">
-
-❌ 潮汐API連線失敗
-
-</div>
-`;
-
-}
+    document.getElementById(
+      'tideInfo'
+    ).innerHTML = `
+      <div class="card">
+        ❌ 潮汐API連線失敗
+      </div>
+    `;
 }
 
 function gps(){
