@@ -165,6 +165,40 @@ async function loadTideData(){
 
 <div id='out'></div>
 <button onclick='gps()'>GPS定位</button>
+
+<button onclick='openWindy()'>
+🌪 Windy
+</button>
+
+<button onclick='openWindguru()'>
+📈 Windguru
+</button>
+
+<div class="card">
+
+<h3>⚙️ 中央氣象署 API Key</h3>
+
+<input
+ id="cwaKey"
+ type="password"
+ placeholder="輸入 API Key"
+ style="
+ width:100%;
+ padding:8px;
+ border-radius:6px;
+ margin-top:8px;
+ "
+>
+
+<br><br>
+
+<button onclick="saveCwaKey()">
+儲存 API Key
+</button>
+
+</div>
+
+<div id="tideInfo"></div>
 <div id='out'></div></div>
 <script>
   function gps(){
@@ -200,7 +234,44 @@ async function loadTideData(){
     }
 
   );
+function saveCwaKey(){
 
+ const key =
+  document.getElementById(
+   'cwaKey'
+  ).value;
+
+ localStorage.setItem(
+  'CWA_API_KEY',
+  key
+ );
+
+ alert('已儲存 API Key');
+
+}
+
+window.addEventListener(
+
+ 'load',
+
+ ()=>{
+
+  const key =
+   localStorage.getItem(
+    'CWA_API_KEY'
+   );
+
+  if(key){
+
+   document.getElementById(
+    'cwaKey'
+   ).value = key;
+
+  }
+
+ }
+
+);
 }
 if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js')}
 const map=L.map('map').setView([25.12,121.91],10);
